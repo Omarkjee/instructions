@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Label Verifier Prototype</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width:800px; margin:40px auto; }
+      .u { margin-bottom: 12px }
+      #results { white-space: pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px }
+      button { padding:10px 14px; font-size:16px }
+    </style>
+  </head>
+  <body>
+    <h1>Label Verifier Prototype</h1>
+    <p class="u">Upload one or more label images; results return extracted fields.</p>
+    <form id="uploadForm">
+      <input type="file" id="files" name="files" accept="image/*" multiple />
+      <div class="u"><button type="submit">Verify</button></div>
+    </form>
+
+    <h3>Results</h3>
+    <div id="results">No results yet.</div>
+
+    <script>
+      const form = document.getElementById('uploadForm');
+      const results = document.getElementById('results');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('files');
+        if (!input.files.length) { results.textContent = 'Choose at least one image.'; return }
+        const fd = new FormData();
+        for (const f of input.files) fd.append('files', f);
+        results.textContent = 'Processing...';
+        try {
+          const resp = await fetch('/api/verify', { method: 'POST', body: fd });
+          const data = await resp.json();
+          results.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          results.textContent = 'Error: ' + err;
+        }
+      });
+    </script>
+  </body>
+</html>
